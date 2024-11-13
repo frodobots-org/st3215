@@ -4,7 +4,7 @@
  * 日期: 2022.3.29
  * 作者:
  */
-#include "gello_teleoperator/SCS.h"
+#include "SCS.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>

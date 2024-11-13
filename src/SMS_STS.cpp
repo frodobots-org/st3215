@@ -5,7 +5,7 @@
  * 作者:
  */
 
-#include "gello_teleoperator/SMS_STS.h"
+#include "SMS_STS.h"
 
 SMS_STS::SMS_STS() { End = 0; }
 

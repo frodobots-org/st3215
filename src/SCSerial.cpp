@@ -5,7 +5,7 @@
  * 作者:
  */
 
-#include "gello_teleoperator/SCSerial.h"
+#include "SCSerial.h"
 
 SCSerial::SCSerial() {
   IOTimeOut = 100;

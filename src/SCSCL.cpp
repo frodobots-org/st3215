@@ -5,7 +5,7 @@
  * 作者:
  */
 
-#include "gello_teleoperator/SCSCL.h"
+#include "SCSCL.h"
 
 SCSCL::SCSCL() { End = 1; }
 

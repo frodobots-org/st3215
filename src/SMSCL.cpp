@@ -5,7 +5,7 @@
  * ����:
  */
 
-#include "gello_teleoperator/SMSCL.h"
+#include "SMSCL.h"
 
 SMSCL::SMSCL() { End = 0; }
 
