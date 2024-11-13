@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include "ST/SCServo.h"
 #include "hal_stream.h"
+#include "agora.h"
 
 volatile static bool b_exit = false;
 
@@ -34,15 +35,19 @@ int main(int argc, const char *argv[])
 
 	std::cout << "Serial: " << argv[1] << std::endl;
 
+	agora_init(argv[2]);
+
 	media_device_init(hal_frame_cb);
 	
-	media_device_start(0, NULL);
+	//media_device_start(0, NULL);
 //	media_device_start(1, NULL);
 //	media_device_start(2, NULL);
 
 	while (!b_exit) {
 		usleep(1000 * 1000);
 	}
+
+	agora_final();
 
 	return ret;
 }

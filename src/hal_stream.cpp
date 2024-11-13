@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define CAMERA_NUM	1
+#define CAMERA_NUM	3
 
 #define CAMERA1_PIPELINE_SOURCE "v4l2src device=/dev/v4l/by-id/usb-HRY_USB_Camera_20191204-video-index0 ! image/jpeg, width=(int)640, height=(int)480, framerate=(fraction)30/1 ! videorate max-rate=30 ! avdec_mjpeg ! videoconvert ! v4l2h264enc min-force-key-unit-interval=1000000000 capture-io-mode=4 output-io-mode=4 extra-controls=encode,video_bitrate=1200000,video_bitrate_mode=0 name=encoder3 ! video/x-h264, stream-format=(string)byte-stream, level=(string)4, alighnment=(string)au ! h264parse config-interval=-1 ! appsink name=app-sink"
 
