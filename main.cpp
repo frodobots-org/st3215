@@ -45,7 +45,7 @@ static void agora_msg_cb(const char *msg, int msg_len)
 			angles.push_back(json_angle->valueint);
 		}
 	}
-	
+
 	st_device_ctl(angles);
 
 	cJSON_Delete(json);
