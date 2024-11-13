@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include "ST/SCServo.h"
+#include "hal_stream.h"
 
 volatile static bool b_exit = false;
 
@@ -16,11 +17,41 @@ static void signal_handler(int sig)
 	b_exit = true;
 }
 
+static void hal_frame_cb(int ch, hal_frame_t *frame, const void *ctx)
+{
+	printf("hal_frame_cb len[%d] is_key[%d]\n", frame->m_len, frame->m_frame_type);
+}
+
+int main(int argc, const char *argv[]) 
+{
+	int ret = 0;
+	if (argc < 2) {
+		printf("argc error! Please provide the serial port as an argument.\n");
+		return 1;
+	}
+
+	signal(SIGINT, signal_handler);
+
+	std::cout << "Serial: " << argv[1] << std::endl;
+
+	media_device_init(hal_frame_cb);
+	
+	media_device_start(0, NULL);
+//	media_device_start(1, NULL);
+//	media_device_start(2, NULL);
+
+	while (!b_exit) {
+		usleep(1000 * 1000);
+	}
+
+	return ret;
+}
+
+#if 0
 uint8_t ID[6] = {1, 2, 3, 4, 5, 6};
 int16_t Position[6];
 uint16_t Speed[6] = {400, 400, 400, 400, 400, 400};
 uint8_t ACC[6] = {50, 50, 50, 50, 50, 50};
-
 
 int main(int argc, const char *argv[]) 
 {
@@ -68,3 +99,4 @@ int main(int argc, const char *argv[])
 	sm_st.end();
 	return ret;
 }
+#endif

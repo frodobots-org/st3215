@@ -14,6 +14,7 @@ CPP_SOURCES := \
 	./src/ST/SMS_STS.cpp \
 	./src/ST/SMSBL.cpp \
 	./src/ST/SMSCL.cpp \
+	./src/hal_stream.cpp \
 	./main.cpp
 
 INC := -I \
@@ -23,7 +24,10 @@ TARGET_CFLAGS :=  \
 	$(INC)
 
 TARGET_CXXFLAGS :=  \
-	$(INC)
+	$(INC) \
+	-Wall $(shell pkg-config --cflags gstreamer-1.0)
+
+TARGET_LDFLAGS := $(shell pkg-config --libs gstreamer-1.0)
 
 .PHONY: make build inc src
 
