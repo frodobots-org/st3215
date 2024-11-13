@@ -40,7 +40,6 @@ static void st_device_cmd_proc()
 			continue;
 		}
 		
-		continue;
 		int16_t pos[JOINT_NUMBER];
 		for (int i = 0; i < JOINT_NUMBER; i++) {
 			pos[i] = angles[i];
@@ -55,7 +54,6 @@ static void st_device_cmd_proc()
 int st_device_init(std::string dev_name)
 {
 	st_dev = new st_dev_t;
-	memset(st_dev, 0, sizeof(st_dev_t));
 
 	for (int i = 0; i < JOINT_NUMBER; i++) {
 		st_dev->id[i] = i + 1;
@@ -75,6 +73,7 @@ int st_device_init(std::string dev_name)
 
 int st_device_ctl(std::vector<int> angles)
 {
+	return 0;
 	if (!st_dev)
 		return 0;
 
