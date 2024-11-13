@@ -8,12 +8,12 @@ LIB :=
 DIR := .
 SRC := .
 CPP_SOURCES := \
-	./src/SCS.cpp \
-	./src/SCSCL.cpp \
-	./src/SCSerial.cpp \
-	./src/SMS_STS.cpp \
-	./src/SMSBL.cpp \
-	./src/SMSCL.cpp \
+	./src/ST/SCS.cpp \
+	./src/ST/SCSCL.cpp \
+	./src/ST/SCSerial.cpp \
+	./src/ST/SMS_STS.cpp \
+	./src/ST/SMSBL.cpp \
+	./src/ST/SMSCL.cpp \
 	./main.cpp
 
 INC := -I \

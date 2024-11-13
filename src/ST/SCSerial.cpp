@@ -5,7 +5,7 @@
  * 作者:
  */
 
-#include "SCSerial.h"
+#include "ST/SCSerial.h"
 
 SCSerial::SCSerial() {
   IOTimeOut = 100;

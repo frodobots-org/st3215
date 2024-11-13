@@ -1,19 +1,19 @@
-/*
- * SMSCL.cpp
- * SMSCLϵ�д��ж���ӿ�
- * ����: 2020.6.17
- * ����:
+﻿/*
+ * SMSBL.cpp
+ * SMSBL系列串行舵机应用层程序
+ * 日期: 2020.6.17
+ * 作者:
  */
 
-#include "SMSCL.h"
+#include "ST/SMSBL.h"
 
-SMSCL::SMSCL() { End = 0; }
+SMSBL::SMSBL() { End = 0; }
 
-SMSCL::SMSCL(u8 End) : SCSerial(End) {}
+SMSBL::SMSBL(u8 End) : SCSerial(End) {}
 
-SMSCL::SMSCL(u8 End, u8 Level) : SCSerial(End, Level) {}
+SMSBL::SMSBL(u8 End, u8 Level) : SCSerial(End, Level) {}
 
-int SMSCL::WritePosEx(u8 ID, s16 Position, u16 Speed, u8 ACC) {
+int SMSBL::WritePosEx(u8 ID, s16 Position, u16 Speed, u8 ACC) {
   if (Position < 0) {
     Position = -Position;
     Position |= (1 << 15);
@@ -24,10 +24,10 @@ int SMSCL::WritePosEx(u8 ID, s16 Position, u16 Speed, u8 ACC) {
   Host2SCS(bBuf + 3, bBuf + 4, 0);
   Host2SCS(bBuf + 5, bBuf + 6, Speed);
 
-  return genWrite(ID, SMSCL_ACC, bBuf, 7);
+  return genWrite(ID, SMSBL_ACC, bBuf, 7);
 }
 
-int SMSCL::RegWritePosEx(u8 ID, s16 Position, u16 Speed, u8 ACC) {
+int SMSBL::RegWritePosEx(u8 ID, s16 Position, u16 Speed, u8 ACC) {
   if (Position < 0) {
     Position = -Position;
     Position |= (1 << 15);
@@ -38,11 +38,12 @@ int SMSCL::RegWritePosEx(u8 ID, s16 Position, u16 Speed, u8 ACC) {
   Host2SCS(bBuf + 3, bBuf + 4, 0);
   Host2SCS(bBuf + 5, bBuf + 6, Speed);
 
-  return regWrite(ID, SMSCL_ACC, bBuf, 7);
+  return regWrite(ID, SMSBL_ACC, bBuf, 7);
 }
 
-void SMSCL::SyncWritePosEx(u8 ID[], u8 IDN, s16 Position[], u16 Speed[],
+void SMSBL::SyncWritePosEx(u8 ID[], u8 IDN, s16 Position[], u16 Speed[],
                            u8 ACC[]) {
+
   u8 offbuf[IDN][7];
   for (u8 i = 0; i < IDN; i++) {
     if (Position[i] < 0) {
@@ -66,38 +67,38 @@ void SMSCL::SyncWritePosEx(u8 ID[], u8 IDN, s16 Position[], u16 Speed[],
     Host2SCS(bBuf + 5, bBuf + 6, V);
     memcpy(offbuf[i], bBuf, 7);
   }
-  snycWrite(ID, IDN, SMSCL_ACC, (u8 *)offbuf, 7);
+  snycWrite(ID, IDN, SMSBL_ACC, (u8 *)offbuf, 7);
 }
 
-int SMSCL::WheelMode(u8 ID) { return writeByte(ID, SMSCL_MODE, 1); }
+int SMSBL::WheelMode(u8 ID) { return writeByte(ID, SMSBL_MODE, 1); }
 
-int SMSCL::WriteSpe(u8 ID, s16 Speed, u8 ACC) {
+int SMSBL::WriteSpe(u8 ID, s16 Speed, u8 ACC) {
   if (Speed < 0) {
     Speed = -Speed;
     Speed |= (1 << 15);
   }
   u8 bBuf[2];
   bBuf[0] = ACC;
-  genWrite(ID, SMSCL_ACC, bBuf, 1);
+  genWrite(ID, SMSBL_ACC, bBuf, 1);
   Host2SCS(bBuf + 0, bBuf + 1, Speed);
 
-  return genWrite(ID, SMSCL_GOAL_SPEED_L, bBuf, 2);
+  return genWrite(ID, SMSBL_GOAL_SPEED_L, bBuf, 2);
 }
 
-int SMSCL::EnableTorque(u8 ID, u8 Enable) {
-  return writeByte(ID, SMSCL_TORQUE_ENABLE, Enable);
+int SMSBL::EnableTorque(u8 ID, u8 Enable) {
+  return writeByte(ID, SMSBL_TORQUE_ENABLE, Enable);
 }
 
-int SMSCL::unLockEprom(u8 ID) { return writeByte(ID, SMSCL_LOCK, 0); }
+int SMSBL::unLockEprom(u8 ID) { return writeByte(ID, SMSBL_LOCK, 0); }
 
-int SMSCL::LockEprom(u8 ID) { return writeByte(ID, SMSCL_LOCK, 1); }
+int SMSBL::LockEprom(u8 ID) { return writeByte(ID, SMSBL_LOCK, 1); }
 
-int SMSCL::CalibrationOfs(u8 ID) {
-  return writeByte(ID, SMSCL_TORQUE_ENABLE, 128);
+int SMSBL::CalibrationOfs(u8 ID) {
+  return writeByte(ID, SMSBL_TORQUE_ENABLE, 128);
 }
 
-int SMSCL::FeedBack(int ID) {
-  int nLen = Read(ID, SMSCL_PRESENT_POSITION_L, Mem, sizeof(Mem));
+int SMSBL::FeedBack(int ID) {
+  int nLen = Read(ID, SMSBL_PRESENT_POSITION_L, Mem, sizeof(Mem));
   if (nLen != sizeof(Mem)) {
     Err = 1;
     return -1;
@@ -106,15 +107,15 @@ int SMSCL::FeedBack(int ID) {
   return nLen;
 }
 
-int SMSCL::ReadPos(int ID) {
+int SMSBL::ReadPos(int ID) {
   int Pos = -1;
   if (ID == -1) {
-    Pos = Mem[SMSCL_PRESENT_POSITION_H - SMSCL_PRESENT_POSITION_L];
+    Pos = Mem[SMSBL_PRESENT_POSITION_H - SMSBL_PRESENT_POSITION_L];
     Pos <<= 8;
-    Pos |= Mem[SMSCL_PRESENT_POSITION_L - SMSCL_PRESENT_POSITION_L];
+    Pos |= Mem[SMSBL_PRESENT_POSITION_L - SMSBL_PRESENT_POSITION_L];
   } else {
     Err = 0;
-    Pos = readWord(ID, SMSCL_PRESENT_POSITION_L);
+    Pos = readWord(ID, SMSBL_PRESENT_POSITION_L);
     if (Pos == -1) {
       Err = 1;
     }
@@ -126,15 +127,15 @@ int SMSCL::ReadPos(int ID) {
   return Pos;
 }
 
-int SMSCL::ReadSpeed(int ID) {
+int SMSBL::ReadSpeed(int ID) {
   int Speed = -1;
   if (ID == -1) {
-    Speed = Mem[SMSCL_PRESENT_SPEED_H - SMSCL_PRESENT_POSITION_L];
+    Speed = Mem[SMSBL_PRESENT_SPEED_H - SMSBL_PRESENT_POSITION_L];
     Speed <<= 8;
-    Speed |= Mem[SMSCL_PRESENT_SPEED_L - SMSCL_PRESENT_POSITION_L];
+    Speed |= Mem[SMSBL_PRESENT_SPEED_L - SMSBL_PRESENT_POSITION_L];
   } else {
     Err = 0;
-    Speed = readWord(ID, SMSCL_PRESENT_SPEED_L);
+    Speed = readWord(ID, SMSBL_PRESENT_SPEED_L);
     if (Speed == -1) {
       Err = 1;
       return -1;
@@ -146,15 +147,15 @@ int SMSCL::ReadSpeed(int ID) {
   return Speed;
 }
 
-int SMSCL::ReadLoad(int ID) {
+int SMSBL::ReadLoad(int ID) {
   int Load = -1;
   if (ID == -1) {
-    Load = Mem[SMSCL_PRESENT_LOAD_H - SMSCL_PRESENT_POSITION_L];
+    Load = Mem[SMSBL_PRESENT_LOAD_H - SMSBL_PRESENT_POSITION_L];
     Load <<= 8;
-    Load |= Mem[SMSCL_PRESENT_LOAD_L - SMSCL_PRESENT_POSITION_L];
+    Load |= Mem[SMSBL_PRESENT_LOAD_L - SMSBL_PRESENT_POSITION_L];
   } else {
     Err = 0;
-    Load = readWord(ID, SMSCL_PRESENT_LOAD_L);
+    Load = readWord(ID, SMSBL_PRESENT_LOAD_L);
     if (Load == -1) {
       Err = 1;
     }
@@ -165,13 +166,13 @@ int SMSCL::ReadLoad(int ID) {
   return Load;
 }
 
-int SMSCL::ReadVoltage(int ID) {
+int SMSBL::ReadVoltage(int ID) {
   int Voltage = -1;
   if (ID == -1) {
-    Voltage = Mem[SMSCL_PRESENT_VOLTAGE - SMSCL_PRESENT_POSITION_L];
+    Voltage = Mem[SMSBL_PRESENT_VOLTAGE - SMSBL_PRESENT_POSITION_L];
   } else {
     Err = 0;
-    Voltage = readByte(ID, SMSCL_PRESENT_VOLTAGE);
+    Voltage = readByte(ID, SMSBL_PRESENT_VOLTAGE);
     if (Voltage == -1) {
       Err = 1;
     }
@@ -179,13 +180,13 @@ int SMSCL::ReadVoltage(int ID) {
   return Voltage;
 }
 
-int SMSCL::ReadTemper(int ID) {
+int SMSBL::ReadTemper(int ID) {
   int Temper = -1;
   if (ID == -1) {
-    Temper = Mem[SMSCL_PRESENT_TEMPERATURE - SMSCL_PRESENT_POSITION_L];
+    Temper = Mem[SMSBL_PRESENT_TEMPERATURE - SMSBL_PRESENT_POSITION_L];
   } else {
     Err = 0;
-    Temper = readByte(ID, SMSCL_PRESENT_TEMPERATURE);
+    Temper = readByte(ID, SMSBL_PRESENT_TEMPERATURE);
     if (Temper == -1) {
       Err = 1;
     }
@@ -193,13 +194,13 @@ int SMSCL::ReadTemper(int ID) {
   return Temper;
 }
 
-int SMSCL::ReadMove(int ID) {
+int SMSBL::ReadMove(int ID) {
   int Move = -1;
   if (ID == -1) {
-    Move = Mem[SMSCL_MOVING - SMSCL_PRESENT_POSITION_L];
+    Move = Mem[SMSBL_MOVING - SMSBL_PRESENT_POSITION_L];
   } else {
     Err = 0;
-    Move = readByte(ID, SMSCL_MOVING);
+    Move = readByte(ID, SMSBL_MOVING);
     if (Move == -1) {
       Err = 1;
     }
@@ -207,15 +208,15 @@ int SMSCL::ReadMove(int ID) {
   return Move;
 }
 
-int SMSCL::ReadCurrent(int ID) {
+int SMSBL::ReadCurrent(int ID) {
   int Current = -1;
   if (ID == -1) {
-    Current = Mem[SMSCL_PRESENT_CURRENT_H - SMSCL_PRESENT_POSITION_L];
+    Current = Mem[SMSBL_PRESENT_CURRENT_H - SMSBL_PRESENT_POSITION_L];
     Current <<= 8;
-    Current |= Mem[SMSCL_PRESENT_CURRENT_L - SMSCL_PRESENT_POSITION_L];
+    Current |= Mem[SMSBL_PRESENT_CURRENT_L - SMSBL_PRESENT_POSITION_L];
   } else {
     Err = 0;
-    Current = readWord(ID, SMSCL_PRESENT_CURRENT_L);
+    Current = readWord(ID, SMSBL_PRESENT_CURRENT_L);
     if (Current == -1) {
       Err = 1;
       return -1;

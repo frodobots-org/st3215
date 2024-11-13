@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
-#include "SCServo.h"
+#include "ST/SCServo.h"
 
 volatile static bool b_exit = false;
 

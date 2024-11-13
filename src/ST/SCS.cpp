@@ -4,7 +4,7 @@
  * 日期: 2022.3.29
  * 作者:
  */
-#include "SCS.h"
+#include "ST/SCS.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
