@@ -21,6 +21,19 @@ static void signal_handler(int sig)
 static void hal_frame_cb(int ch, hal_frame_t *frame, const void *ctx)
 {
 	printf("hal_frame_cb len[%d] is_key[%d]\n", frame->m_len, frame->m_frame_type);
+
+	agora_frame_send(ch + 1, frame);
+}
+
+static void agora_msg_cb(const char *msg, int msg_len)
+{
+	printf("agora_msg_cb msg[%s] len[%d]\n", msg, msg_len);
+}
+
+static void agora_conn_cb(int uid)
+{
+	printf("agora_conn_cb uid[%d]\n", uid);
+	media_device_start(uid % 1000, NULL);
 }
 
 int main(int argc, const char *argv[]) 
@@ -35,13 +48,9 @@ int main(int argc, const char *argv[])
 
 	std::cout << "Serial: " << argv[1] << std::endl;
 
-	agora_init(argv[2]);
+	agora_init(argv[2], agora_conn_cb, agora_msg_cb);
 
 	media_device_init(hal_frame_cb);
-	
-	//media_device_start(0, NULL);
-//	media_device_start(1, NULL);
-//	media_device_start(2, NULL);
 
 	while (!b_exit) {
 		usleep(1000 * 1000);

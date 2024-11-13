@@ -15,7 +15,10 @@
 #define MAX_CHN_NUM 3
 
 typedef struct agora {
-	uint32_t conn_id[3];
+	uint32_t	conn_id[3];
+	agora_connnected_cb_t ccb;
+	agora_msg_cb_t	mcb;
+	bool		user_connected[4];
 } agora_t;
 
 static agora_t g_agora;
@@ -31,7 +34,9 @@ static size_t write_memory_cb(void *ptr, size_t size, size_t nmemb, void *contex
 
 static void __on_rtm_data(const char *user_id, const void *data, size_t data_len)
 {
-	printf("on data[%s]\n", data);
+	agora_t *ago = &g_agora;
+	if (ago->mcb)
+		ago->mcb((const char *)data, data_len);
 }
 
 static void __on_rtm_event(const char *user_id, rtm_event_type_e event_id, rtm_err_code_e event_code)
@@ -76,7 +81,7 @@ static int basic_auth_post(std::string url, std::string username, std::string pa
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 		res = curl_easy_perform(curl);
 		if(res != CURLE_OK) {
-			printf("curl_easy_perform() failed: {}", curl_easy_strerror(res));
+			printf("curl_easy_perform() failed: %s", curl_easy_strerror(res));
 		}
 		else {
 			//std::cout << result << std::endl;
@@ -93,6 +98,10 @@ static int basic_auth_post(std::string url, std::string username, std::string pa
 static void __on_join_channel_success(connection_id_t conn_id, uint32_t uid, int elapsed)
 {
 	printf("uid %d join successfully by conn id %d\n", uid, conn_id);
+	
+	agora_t *ago = &g_agora;
+	if (ago->ccb)
+		ago->ccb((int)uid);
 }
 
 static void __on_reconnecting(connection_id_t conn_id)
@@ -113,11 +122,15 @@ static void __on_rejoin_channel_success(connection_id_t conn_id, uint32_t uid, i
 static void __on_user_joined(connection_id_t conn_id, uint32_t uid, int elapsed_ms)
 {
 	printf("func:%s, user joind... conn_id=%d\n", __func__, conn_id);
+	agora_t *ago = &g_agora;
+	ago->user_connected[conn_id] = true;
 }
 
 static void __on_user_offline(connection_id_t conn_id, uint32_t uid, int reason)
 {
 	printf("func:%s, user offline ...\n", __func__);
+	agora_t *ago = &g_agora;
+	ago->user_connected[conn_id] = false;
 }
 
 static void __on_user_mute_audio(connection_id_t conn_id, uint32_t uid, bool muted)
@@ -164,10 +177,12 @@ static void __on_key_frame_gen_req(connection_id_t conn_id, uint32_t uid,
 {
 }
 
-int agora_init(std::string room)
+int agora_init(std::string room, agora_connnected_cb_t ccb, agora_msg_cb_t mcb)
 {
 	memset(&g_agora, 0, sizeof(g_agora));
 	agora_t *ago = &g_agora;
+	ago->ccb = ccb;
+	ago->mcb = mcb;
 
 	rtc_service_option_t service_opt = { 0 };
 	service_opt.area_code = AREA_CODE_GLOB;
@@ -192,7 +207,7 @@ int agora_init(std::string room)
 
 	int rval = agora_rtc_init("3b64a6f5683d4abe9a7f3f72b7e7e9c8", &event_handler, &service_opt);
 	if (rval < 0) {
-		printf("%s agora sdk init failed, rval=%d error=%s\n", rval, agora_rtc_err_2_str(rval));
+		printf("agora sdk init failed, rval=%d error=%s\n", rval, agora_rtc_err_2_str(rval));
 		return -1;
 	}
 	
@@ -277,4 +292,27 @@ void agora_final()
 {
 	agora_rtc_logout_rtm();
 	agora_rtc_fini();
+}
+
+int agora_frame_send(int conn_id, const hal_frame_t *frame)
+{
+	agora_t *ago = &g_agora;
+
+	if (false == ago->user_connected[conn_id])
+		return -1;
+
+	video_frame_info_t video_frame_info;
+	memset(&video_frame_info, 0, sizeof(video_frame_info));
+	video_frame_info.frame_rate = (video_frame_rate_e)30;
+	video_frame_info.data_type = VIDEO_DATA_TYPE_H264;
+	video_frame_info.stream_type = VIDEO_STREAM_HIGH;
+	video_frame_info.frame_type = (frame->m_frame_type == HFT_I)? VIDEO_FRAME_KEY : VIDEO_FRAME_DELTA;
+
+	int rval = agora_rtc_send_video_data(conn_id, frame->m_data, frame->m_len, &video_frame_info);
+	if(rval < 0) {
+		printf("send failed: %s", agora_rtc_err_2_str(rval));
+		return -1;
+	}
+
+	return 0;
 }
