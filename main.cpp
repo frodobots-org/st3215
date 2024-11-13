@@ -7,9 +7,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <cjson/cJSON.h>
 #include "ST/SCServo.h"
 #include "hal_stream.h"
 #include "agora.h"
+#include "st_dev.h"
 
 volatile static bool b_exit = false;
 
@@ -27,6 +29,26 @@ static void hal_frame_cb(int ch, hal_frame_t *frame, const void *ctx)
 static void agora_msg_cb(const char *msg, int msg_len)
 {
 	printf("agora_msg_cb msg[%s] len[%d]\n", msg, msg_len);
+
+	cJSON *json = cJSON_Parse((char*)msg);
+	if (!json) {
+		printf("cJSON_Parse error.\n");
+		return ;
+	}
+
+	std::vector<int> angles;
+	cJSON *json_angles = cJSON_GetObjectItem(json, "angles");
+
+	cJSON *json_angle;
+	cJSON_ArrayForEach(json_angle, json_angles) {
+		if (cJSON_IsNumber(json_angle)) {
+			angles.push_back(json_angle->valueint);
+		}
+	}
+	
+	st_device_ctl(angles);
+
+	cJSON_Delete(json);
 }
 
 static void agora_conn_cb(int uid)
@@ -47,6 +69,8 @@ int main(int argc, const char *argv[])
 
 	std::cout << "Serial: " << argv[1] << std::endl;
 
+	st_device_init(argv[1]);
+
 	media_device_init(hal_frame_cb);
 	
 	agora_init(argv[2], agora_conn_cb, agora_msg_cb);
@@ -56,6 +80,8 @@ int main(int argc, const char *argv[])
 	}
 
 	agora_final();
+
+	st_device_final();
 
 	return ret;
 }

@@ -169,7 +169,7 @@ static void __on_video_data(connection_id_t conn_id, const uint32_t uid, uint16_
 
 static void __on_target_bitrate_changed(connection_id_t conn_id, uint32_t target_bps)
 {
-	printf("finc:%s, target_bps=%d.\n", __func__, target_bps);
+//	printf("finc:%s, target_bps=%d.\n", __func__, target_bps);
 }
 
 static void __on_key_frame_gen_req(connection_id_t conn_id, uint32_t uid,
@@ -186,12 +186,12 @@ int agora_init(std::string room, agora_connnected_cb_t ccb, agora_msg_cb_t mcb)
 
 	rtc_service_option_t service_opt = { 0 };
 	service_opt.area_code = AREA_CODE_GLOB;
+
 	agora_rtc_event_handler_t event_handler;
 	memset(&event_handler, 0, sizeof(event_handler));
-
 	event_handler.on_join_channel_success = __on_join_channel_success;
 	event_handler.on_reconnecting = __on_reconnecting,
-		event_handler.on_connection_lost = __on_connection_lost;
+	event_handler.on_connection_lost = __on_connection_lost;
 	event_handler.on_rejoin_channel_success = __on_rejoin_channel_success;
 	event_handler.on_user_joined = __on_user_joined;
 	event_handler.on_user_offline = __on_user_offline;

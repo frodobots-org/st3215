@@ -16,6 +16,7 @@ CPP_SOURCES := \
 	./src/ST/SMSCL.cpp \
 	./src/hal_stream.cpp \
 	./src/agora.cpp \
+	./src/st_dev.cpp \
 	./main.cpp
 
 INC := -I \
