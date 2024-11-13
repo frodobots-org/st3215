@@ -48,9 +48,9 @@ int main(int argc, const char *argv[])
 
 	std::cout << "Serial: " << argv[1] << std::endl;
 
-	agora_init(argv[2], agora_conn_cb, agora_msg_cb);
-
 	media_device_init(hal_frame_cb);
+	
+	agora_init(argv[2], agora_conn_cb, agora_msg_cb);
 
 	while (!b_exit) {
 		usleep(1000 * 1000);
