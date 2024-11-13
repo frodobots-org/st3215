@@ -45,8 +45,7 @@ static GstFlowReturn on_front_cam_data(GstElement *sink, void *data)
 		buffer = gst_sample_get_buffer(sample);
 		gst_buffer_map(buffer, &info, GST_MAP_READ);
 		buf = info.data + 6;
-		printf("ch [%d].\n", ch);
-		
+
 		hal_frame_t frame;
 		memset(&frame, 0, sizeof(hal_frame_t));
 		frame.m_frame_type = (buf[4] & 0x05) == 0x05 ? HFT_I : HFT_B;

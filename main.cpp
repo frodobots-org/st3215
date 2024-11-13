@@ -20,8 +20,7 @@ static void signal_handler(int sig)
 
 static void hal_frame_cb(int ch, hal_frame_t *frame, const void *ctx)
 {
-	printf("hal_frame_cb len[%d] is_key[%d]\n", frame->m_len, frame->m_frame_type);
-
+//	printf("hal_frame_cb len[%d] is_key[%d]\n", frame->m_len, frame->m_frame_type);
 	agora_frame_send(ch + 1, frame);
 }
 
