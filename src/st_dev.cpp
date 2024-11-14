@@ -73,7 +73,6 @@ int st_device_init(std::string dev_name)
 
 int st_device_ctl(std::vector<int> angles)
 {
-	return 0;
 	if (!st_dev)
 		return 0;
 
