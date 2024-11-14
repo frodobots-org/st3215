@@ -7,7 +7,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
-#include "SCServo.h"
+#include <cjson/cJSON.h>
+#include "ST/SCServo.h"
+#include "hal_stream.h"
+#include "agora.h"
+#include "st_dev.h"
 
 volatile static bool b_exit = false;
 
@@ -16,11 +20,77 @@ static void signal_handler(int sig)
 	b_exit = true;
 }
 
+static void hal_frame_cb(int ch, hal_frame_t *frame, const void *ctx)
+{
+//	printf("hal_frame_cb len[%d] is_key[%d]\n", frame->m_len, frame->m_frame_type);
+	agora_frame_send(ch + 1, frame);
+}
+
+static void agora_msg_cb(const char *msg, int msg_len)
+{
+	printf("agora_msg_cb msg[%s] len[%d]\n", msg, msg_len);
+
+	cJSON *json = cJSON_Parse((char*)msg);
+	if (!json) {
+		printf("cJSON_Parse error.\n");
+		return ;
+	}
+
+	std::vector<int> angles;
+	cJSON *json_angles = cJSON_GetObjectItem(json, "angles");
+
+	cJSON *json_angle;
+	cJSON_ArrayForEach(json_angle, json_angles) {
+		if (cJSON_IsNumber(json_angle)) {
+			angles.push_back(json_angle->valueint);
+		}
+	}
+
+	st_device_ctl(angles);
+
+	cJSON_Delete(json);
+}
+
+static void agora_conn_cb(int uid)
+{
+	printf("agora_conn_cb uid[%d]\n", uid);
+	media_device_start(uid % 1000, NULL);
+}
+
+int main(int argc, const char *argv[]) 
+{
+	int ret = 0;
+	if (argc < 2) {
+		printf("argc error! Please provide the serial port as an argument.\n");
+		return 1;
+	}
+
+	signal(SIGINT, signal_handler);
+
+	std::cout << "Serial: " << argv[1] << std::endl;
+
+	st_device_init(argv[1]);
+
+	media_device_init(hal_frame_cb);
+	
+	agora_init(argv[2], agora_conn_cb, agora_msg_cb);
+
+	while (!b_exit) {
+		usleep(1000 * 1000);
+	}
+
+	agora_final();
+
+	st_device_final();
+
+	return ret;
+}
+
+#if 0
 uint8_t ID[6] = {1, 2, 3, 4, 5, 6};
 int16_t Position[6];
 uint16_t Speed[6] = {400, 400, 400, 400, 400, 400};
 uint8_t ACC[6] = {50, 50, 50, 50, 50, 50};
-
 
 int main(int argc, const char *argv[]) 
 {
@@ -68,3 +138,4 @@ int main(int argc, const char *argv[])
 	sm_st.end();
 	return ret;
 }
+#endif
